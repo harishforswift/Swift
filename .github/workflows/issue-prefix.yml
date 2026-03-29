@@ -1,0 +1,27 @@
+name: Auto-Prefix Issue ID
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  add-prefix:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Get Issue Count and Update Title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prefix = "SWFT-";
+            const issueNumber = context.issue.number;
+            // Pad the number (e.g., 001 instead of 1)
+            const paddedId = String(issueNumber).padStart(3, '0');
+            const newTitle = `${prefix}${paddedId}: ${context.payload.issue.title}`;
+            
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              title: newTitle
+            });
